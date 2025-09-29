@@ -1,47 +1,113 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useParams, Navigate } from 'react-router-dom';
+import { SchoolListPage } from './pages/schools/SchoolListPage';
+import { SchoolProfilePage } from './pages/schools/SchoolProfilePage';
+import LoginPage from './components/LoginPage';
+import { useAuthStore } from './stores/authStore';
+import logo from './assets/logo.jpg';
+
+// Wrapper component to handle route parameters
+const SchoolProfileWrapper: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  return <SchoolProfilePage schoolId={id || ''} />;
+};
+
+// Protected Route component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { isAuthenticated, login, logout, user } = useAuthStore();
+
+  const handleLogin = () => {
+    login('DEV/iDL0001');
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto py-16 px-4">
-        <div className="text-center">
-          <div className="flex justify-center space-x-8 mb-8">
-            <a href="https://vitejs.dev" target="_blank" rel="noopener noreferrer">
-              <img src={viteLogo} className="h-24 w-24 hover:opacity-80 transition-opacity" alt="Vite logo" />
-            </a>
-            <a href="https://react.dev" target="_blank" rel="noopener noreferrer">
-              <img src={reactLogo} className="h-24 w-24 hover:opacity-80 transition-opacity animate-spin" alt="React logo" />
-            </a>
-          </div>
-          
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">
-            Portal Dev Dashboard
-          </h1>
-          
-          <p className="text-lg text-gray-600 mb-8">
-            Vite + React + TypeScript + Tailwind CSS
-          </p>
-          
-          <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <button
-              onClick={() => setCount((count) => count + 1)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
-            >
-              Count is {count}
-            </button>
-          </div>
-          
-          <p className="text-sm text-gray-500">
-            Edit <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">src/App.tsx</code> and save to test HMR
-          </p>
-        </div>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        {isAuthenticated ? (
+          <>
+            {/* Navigation */}
+            <nav className="bg-white shadow-sm border-b border-gray-200">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between h-16">
+                  <div className="flex items-center">
+                    <Link to="/schools" className="flex items-center space-x-3">
+                      <img 
+                        src={logo} 
+                        alt="iDEAL Smart Solution Limited" 
+                        className="w-10 h-10 object-contain"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-xl font-bold text-gray-900">School Management System</span>
+                        <span className="text-xs text-blue-600 font-medium">Dev Dashboard</span>
+                      </div>
+                    </Link>
+                  </div>
+                  <div className="flex items-center space-x-8">
+                    <Link
+                      to="/schools"
+                      className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                    >
+                      Schools
+                    </Link>
+                    <Link
+                      to="/users"
+                      className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                    >
+                      Users
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                    >
+                      Settings
+                    </Link>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-gray-600">Welcome, {user?.uin}</span>
+                      <button
+                        onClick={logout}
+                        className="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </nav>
+
+            {/* Main Content */}
+            <main>
+              <Routes>
+                <Route path="/" element={<Navigate to="/schools" replace />} />
+                <Route path="/schools" element={
+                  <ProtectedRoute>
+                    <SchoolListPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/schools/:id" element={
+                  <ProtectedRoute>
+                    <SchoolProfileWrapper />
+                  </ProtectedRoute>
+                } />
+                <Route path="/login" element={<Navigate to="/schools" replace />} />
+              </Routes>
+            </main>
+          </>
+        ) : (
+          <Routes>
+            <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        )}
       </div>
-    </div>
-  )
+    </Router>
+  );
 }
 
-export default App
+
+export default App;

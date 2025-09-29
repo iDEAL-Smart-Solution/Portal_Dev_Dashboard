@@ -1,5 +1,5 @@
 {
-  "name": "portal-dev-dashboard",
+  "name": "school-management-system-dev-dashboard",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.9.2",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
