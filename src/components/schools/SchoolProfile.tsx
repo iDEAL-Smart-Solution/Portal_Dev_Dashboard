@@ -1,5 +1,6 @@
 import React from 'react';
 import { GetSchoolResponse } from '../../types/school';
+import { Edit3, Power } from 'lucide-react';
 
 interface SchoolProfileProps {
   school: GetSchoolResponse;
@@ -49,19 +50,23 @@ export const SchoolProfile: React.FC<SchoolProfileProps> = ({
         <div className="flex space-x-2">
           <button
             onClick={onEdit}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2"
+            title="Edit School Details"
           >
-            Edit Details
+            <Edit3 className="w-4 h-4" />
+            <span>Edit Details</span>
           </button>
           <button
             onClick={onUpdateSubscription}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 ${
               school.isSubscrptionActive
                 ? 'bg-red-600 hover:bg-red-700 text-white'
                 : 'bg-green-600 hover:bg-green-700 text-white'
             }`}
+            title={school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
           >
-            {school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
+            <Power className="w-4 h-4" />
+            <span>{school.isSubscrptionActive ? 'Deactivate' : 'Activate'}</span>
           </button>
         </div>
       </div>

@@ -1,47 +1,7 @@
 import { create } from 'zustand';
 import { GetSchoolResponse, CreateSchoolRequest, UpdateSchoolRequest } from '../types/school';
+import axiosInstance from '../config/axios';
 
-// Mock data for development
-const mockSchools: GetSchoolResponse[] = [
-  {
-    id: '1',
-    schoolName: 'Greenwood Elementary School',
-    schoolLogoFilePath: '/logos/greenwood-logo.png',
-    colorCode: '#4F46E5',
-    address: '123 Education St, Learning City, LC 12345',
-    phoneNumber: '+1 (555) 123-4567',
-    email: 'info@greenwood.edu',
-    isSubscrptionActive: true,
-    userId: 'user1',
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-20T14:45:00Z'
-  },
-  {
-    id: '2',
-    schoolName: 'Riverside High School',
-    schoolLogoFilePath: '/logos/riverside-logo.png',
-    colorCode: '#059669',
-    address: '456 Knowledge Ave, Education Town, ET 67890',
-    phoneNumber: '+1 (555) 987-6543',
-    email: 'contact@riverside.edu',
-    isSubscrptionActive: false,
-    userId: 'user2',
-    createdAt: '2024-01-10T09:15:00Z',
-    updatedAt: '2024-01-18T16:20:00Z'
-  },
-  {
-    id: '3',
-    schoolName: 'Sunshine Middle School',
-    colorCode: '#DC2626',
-    address: '789 Learning Blvd, Study City, SC 54321',
-    phoneNumber: '+1 (555) 456-7890',
-    email: 'hello@sunshine.edu',
-    isSubscrptionActive: true,
-    userId: 'user3',
-    createdAt: '2024-01-12T11:00:00Z',
-    updatedAt: '2024-01-19T13:30:00Z'
-  }
-];
 
 interface SchoolState {
   schools: GetSchoolResponse[];
@@ -60,7 +20,7 @@ interface SchoolState {
 }
 
 export const useSchoolStore = create<SchoolState>((set, get) => ({
-  schools: mockSchools,
+  schools: [],
   selectedSchool: null,
   isLoading: false,
   error: null,
@@ -68,11 +28,19 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
   fetchSchools: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      set({ schools: mockSchools, isLoading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch schools', isLoading: false });
+      const response = await axiosInstance.get('/School/get-all');
+      const schools: GetSchoolResponse[] = response.data;
+      set({ schools, isLoading: false });
+    } catch (error: any) {
+      let errorMessage = 'Failed to fetch schools';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      set({ error: errorMessage, isLoading: false });
     }
   },
 

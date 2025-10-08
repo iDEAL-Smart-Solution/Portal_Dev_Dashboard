@@ -31,9 +31,9 @@ export interface GetSchoolResponse {
   phoneNumber?: string;
   email?: string;
   isSubscrptionActive: boolean;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SchoolFormData {

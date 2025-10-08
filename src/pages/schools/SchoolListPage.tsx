@@ -116,8 +116,8 @@ export const SchoolListPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Manage Schools</h1>
-              <p className="text-gray-600 mt-1">View and manage all registered schools</p>
+              <h1 className="text-3xl font-bold text-gray-900">Platform Schools</h1>
+              <p className="text-gray-600 mt-1">Manage all schools registered on the platform</p>
             </div>
             <button
               onClick={() => setShowAddForm(true)}
@@ -126,7 +126,7 @@ export const SchoolListPage: React.FC = () => {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>Add School</span>
+              <span>Register School</span>
             </button>
           </div>
         </div>
@@ -141,7 +141,7 @@ export const SchoolListPage: React.FC = () => {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search schools by name, email, or phone..."
+                  placeholder="Search schools by name, email, or phone number..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -226,7 +226,7 @@ export const SchoolListPage: React.FC = () => {
             <p className="text-gray-600 mb-4">
               {searchTerm || filterStatus !== 'all' 
                 ? 'Try adjusting your search or filter criteria.' 
-                : 'Get started by adding your first school.'
+                : 'No schools have been registered on the platform yet.'
               }
             </p>
             {!searchTerm && filterStatus === 'all' && (
@@ -234,7 +234,7 @@ export const SchoolListPage: React.FC = () => {
                 onClick={() => setShowAddForm(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
               >
-                Add School
+                Register School
               </button>
             )}
           </div>

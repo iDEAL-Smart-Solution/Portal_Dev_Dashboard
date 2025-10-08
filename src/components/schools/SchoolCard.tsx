@@ -1,5 +1,6 @@
 import React from 'react';
 import { GetSchoolResponse } from '../../types/school';
+import { Eye, Edit3, Power } from 'lucide-react';
 
 interface SchoolCardProps {
   school: GetSchoolResponse;
@@ -83,25 +84,31 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({
       <div className="flex space-x-2">
         <button
           onClick={() => onViewProfile(school)}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
+          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2"
+          title="View Profile"
         >
-          View Profile
+          <Eye className="w-4 h-4" />
+          <span>View</span>
         </button>
         <button
           onClick={() => onEdit(school)}
-          className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
+          className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2"
+          title="Edit School"
         >
-          Edit
+          <Edit3 className="w-4 h-4" />
+          <span>Edit</span>
         </button>
         <button
           onClick={() => onToggleSubscription(school)}
-          className={`flex-1 text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 ${
+          className={`flex-1 text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 ${
             school.isSubscrptionActive
               ? 'bg-red-600 hover:bg-red-700 text-white'
               : 'bg-green-600 hover:bg-green-700 text-white'
           }`}
+          title={school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
         >
-          {school.isSubscrptionActive ? 'Deactivate' : 'Activate'}
+          <Power className="w-4 h-4" />
+          <span>{school.isSubscrptionActive ? 'Off' : 'On'}</span>
         </button>
       </div>
     </div>

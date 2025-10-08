@@ -1,32 +1,27 @@
 import React, { useState } from 'react';
 import logo from '../assets/logo.jpg';
+import { useAuthStore } from '../stores/authStore';
+import { LoginRequest } from '../types/auth';
 
-interface LoginPageProps {
-  onLogin: () => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage: React.FC = () => {
   const [uin, setUin] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    clearError();
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const credentials: LoginRequest = {
+      UIN: uin,
+      Password: password,
+    };
 
-    // Check credentials
-    if (uin === 'DEV/iDL0001' && password === 'passer') {
-      onLogin();
-    } else {
-      setError('Invalid UIN or password. Please try again.');
+    const success = await login(credentials);
+    if (!success) {
+      // Error is handled by the auth store
+      console.error('Login failed');
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -40,10 +35,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          School Management System
+          Developer Dashboard
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Dev Dashboard
+          Platform Management System
         </p>
         <p className="mt-1 text-center text-xs text-blue-600 font-medium">
           by iDEAL Smart Solution Limited
@@ -127,24 +122,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Demo Credentials</span>
-              </div>
-            </div>
-
-            <div className="mt-4 bg-gray-50 rounded-md p-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Test Login Details:</h4>
-              <div className="text-sm text-gray-600 space-y-1">
-                <div><strong>UIN:</strong> DEV/iDL0001</div>
-                <div><strong>Password:</strong> passer</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

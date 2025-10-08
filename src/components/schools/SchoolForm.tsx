@@ -77,11 +77,11 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">
-          {mode === 'create' ? 'Add New School' : 'Edit School'}
+          {mode === 'create' ? 'Register New School' : 'Edit School'}
         </h2>
         <p className="text-gray-600 mt-1">
           {mode === 'create' 
-            ? 'Fill in the details to create a new school' 
+            ? 'Register a new school on the platform' 
             : 'Update the school information below'
           }
         </p>
