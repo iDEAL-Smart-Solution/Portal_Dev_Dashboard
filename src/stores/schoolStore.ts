@@ -1,16 +1,18 @@
 import { create } from 'zustand';
-import { GetSchoolResponse, CreateSchoolRequest, UpdateSchoolRequest } from '../types/school';
+import { GetSchoolResponse, CreateSchoolRequest, UpdateSchoolRequest, GetSingleSchoolWithSubs } from '../types/school';
 import axiosInstance from '../config/axios';
 
 
 interface SchoolState {
   schools: GetSchoolResponse[];
   selectedSchool: GetSchoolResponse | null;
+  selectedSchoolDetails: GetSingleSchoolWithSubs | null;
   isLoading: boolean;
   error: string | null;
   
   // Actions
   fetchSchools: () => Promise<void>;
+  fetchSchoolById: (id: string) => Promise<void>;
   getSchoolById: (id: string) => GetSchoolResponse | undefined;
   createSchool: (schoolData: CreateSchoolRequest) => Promise<void>;
   updateSchool: (schoolData: UpdateSchoolRequest) => Promise<void>;
@@ -22,6 +24,7 @@ interface SchoolState {
 export const useSchoolStore = create<SchoolState>((set, get) => ({
   schools: [],
   selectedSchool: null,
+  selectedSchoolDetails: null,
   isLoading: false,
   error: null,
 
@@ -44,6 +47,25 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
     }
   },
 
+  fetchSchoolById: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.get(`/School/get-by-id?id=${id}`);
+      const schoolDetails: GetSingleSchoolWithSubs = response.data.data;
+      set({ selectedSchoolDetails: schoolDetails, isLoading: false });
+    } catch (error: any) {
+      let errorMessage = 'Failed to fetch school details';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      set({ error: errorMessage, isLoading: false, selectedSchoolDetails: null });
+    }
+  },
+
   getSchoolById: (id: string) => {
     const { schools } = get();
     return schools.find(school => school.id === id);
@@ -52,23 +74,48 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
   createSchool: async (schoolData: CreateSchoolRequest) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('SchoolName', schoolData.schoolName);
+      formData.append('UserId', schoolData.userId);
       
-      const newSchool: GetSchoolResponse = {
-        id: Date.now().toString(),
-        ...schoolData,
-        isSubscrptionActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      if (schoolData.schoolLogoFilePath) {
+        formData.append('SchoolLogoFilePath', schoolData.schoolLogoFilePath);
+      }
+      if (schoolData.colorCode) {
+        formData.append('ColorCode', schoolData.colorCode);
+      }
+      if (schoolData.address) {
+        formData.append('Address', schoolData.address);
+      }
+      if (schoolData.phoneNumber) {
+        formData.append('PhoneNumber', schoolData.phoneNumber);
+      }
+      if (schoolData.email) {
+        formData.append('Email', schoolData.email);
+      }
 
-      set(state => ({
-        schools: [...state.schools, newSchool],
-        isLoading: false
-      }));
-    } catch (error) {
-      set({ error: 'Failed to create school', isLoading: false });
+      const response = await axiosInstance.post('/School/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Refresh the schools list after creation
+      await get().fetchSchools();
+      
+      set({ isLoading: false });
+    } catch (error: any) {
+      let errorMessage = 'Failed to create school';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      set({ error: errorMessage, isLoading: false });
+      throw error;
     }
   },
 

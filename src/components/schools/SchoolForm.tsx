@@ -18,12 +18,14 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<SchoolFormData>({
     schoolName: '',
-    schoolLogoFilePath: '',
+    schoolLogoFilePath: null,
     colorCode: '#4F46E5',
     address: '',
     phoneNumber: '',
     email: ''
   });
+  
+  const [logoPreview, setLogoPreview] = useState<string>('');
 
   const [errors, setErrors] = useState<Partial<SchoolFormData>>({});
 
@@ -31,12 +33,16 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
     if (school && mode === 'edit') {
       setFormData({
         schoolName: school.schoolName,
-        schoolLogoFilePath: school.schoolLogoFilePath || '',
+        schoolLogoFilePath: null,
         colorCode: school.colorCode || '#4F46E5',
         address: school.address || '',
         phoneNumber: school.phoneNumber || '',
         email: school.email || ''
       });
+      // Set preview for existing logo
+      if (school.schoolLogoFilePath) {
+        setLogoPreview(`http://localhost:5093/ProfilePicture/${school.schoolLogoFilePath}`);
+      }
     }
   }, [school, mode]);
 
@@ -186,19 +192,44 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
           </div>
         </div>
 
-        {/* Logo File Path */}
+        {/* School Logo Upload */}
         <div>
           <label htmlFor="schoolLogoFilePath" className="block text-sm font-medium text-gray-700 mb-2">
-            Logo File Path
+            School Logo
           </label>
-          <input
-            type="text"
-            id="schoolLogoFilePath"
-            value={formData.schoolLogoFilePath}
-            onChange={(e) => handleInputChange('schoolLogoFilePath', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="/path/to/logo.png"
-          />
+          <div className="mt-1 flex items-center space-x-4">
+            {logoPreview && (
+              <div className="flex-shrink-0">
+                <img
+                  src={logoPreview}
+                  alt="School logo preview"
+                  className="h-16 w-16 rounded-lg object-cover border border-gray-300"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <input
+                type="file"
+                id="schoolLogoFilePath"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setFormData({ ...formData, schoolLogoFilePath: file });
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setLogoPreview(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  } else {
+                    setLogoPreview('');
+                  }
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              <p className="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+            </div>
+          </div>
         </div>
 
         {/* Form Actions */}

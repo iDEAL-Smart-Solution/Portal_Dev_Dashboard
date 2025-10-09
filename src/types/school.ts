@@ -2,7 +2,7 @@
 
 export interface CreateSchoolRequest {
   schoolName: string;
-  schoolLogoFilePath?: string;
+  schoolLogoFilePath?: File | null;
   colorCode?: string;
   address?: string;
   phoneNumber?: string;
@@ -38,11 +38,30 @@ export interface GetSchoolResponse {
 
 export interface SchoolFormData {
   schoolName: string;
-  schoolLogoFilePath?: string;
+  schoolLogoFilePath?: File | null;
   colorCode?: string;
   address?: string;
   phoneNumber?: string;
   email?: string;
+}
+
+export interface SubscriptionResponse {
+  id: string;
+  allowedStudentCount: number;
+  registeredStudentCount: number;
+  amountPaid: number;
+  createdAt: string;
+}
+
+export interface GetSingleSchoolWithSubs {
+  schoolName: string;
+  schoolLogoFilePath?: string;
+  address?: string;
+  phoneNumber?: string;
+  email?: string;
+  planType: string;
+  isSubscrptionActive: boolean;
+  schoolSubscription: SubscriptionResponse;
 }
 
 export interface SchoolSubscriptionData {

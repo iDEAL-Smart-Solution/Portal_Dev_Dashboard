@@ -20,18 +20,26 @@ export const SchoolProfile: React.FC<SchoolProfileProps> = ({
         <div className="flex items-center space-x-4">
           {school.schoolLogoFilePath ? (
             <img
-              src={school.schoolLogoFilePath}
+              src={`http://localhost:5093/${school.schoolLogoFilePath}`}
+
               alt={`${school.schoolName} logo`}
               className="w-16 h-16 rounded-lg object-cover"
+              onError={(e) => {
+                // Fallback to initial if image fails to load
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
             />
-          ) : (
-            <div
-              className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl"
-              style={{ backgroundColor: school.colorCode || '#6B7280' }}
-            >
-              {school.schoolName.charAt(0).toUpperCase()}
-            </div>
-          )}
+          ) : null}
+          <div
+            className={`w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl ${
+              school.schoolLogoFilePath ? 'hidden' : ''
+            }`}
+            style={{ backgroundColor: school.colorCode || '#6B7280' }}
+          >
+            {school.schoolName.charAt(0).toUpperCase()}
+          </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{school.schoolName}</h1>
             <div className="flex items-center space-x-2 mt-1">
@@ -176,16 +184,22 @@ export const SchoolProfile: React.FC<SchoolProfileProps> = ({
       </div>
 
       {/* Timestamps */}
-      <div className="border-t border-gray-200 pt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
-          <div>
-            <span className="font-medium">Created:</span> {new Date(school.createdAt).toLocaleString()}
-          </div>
-          <div>
-            <span className="font-medium">Last Updated:</span> {new Date(school.updatedAt).toLocaleString()}
+      {(school.createdAt || school.updatedAt) && (
+        <div className="border-t border-gray-200 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
+            {school.createdAt && (
+              <div>
+                <span className="font-medium">Created:</span> {new Date(school.createdAt).toLocaleString()}
+              </div>
+            )}
+            {school.updatedAt && (
+              <div>
+                <span className="font-medium">Last Updated:</span> {new Date(school.updatedAt).toLocaleString()}
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

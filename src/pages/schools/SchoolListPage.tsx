@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../stores/schoolStore';
+import { useAuthStore } from '../../stores/authStore';
 import { SchoolCard } from '../../components/schools/SchoolCard';
 import { SchoolForm } from '../../components/schools/SchoolForm';
 import { SchoolFormData, GetSchoolResponse } from '../../types/school';
 
 export const SchoolListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const {
     schools,
     isLoading,
@@ -28,10 +30,15 @@ export const SchoolListPage: React.FC = () => {
   }, [fetchSchools]);
 
   const handleCreateSchool = async (formData: SchoolFormData) => {
+    if (!user?.id) {
+      console.error('User ID not found');
+      return;
+    }
+    
     try {
       await createSchool({
         ...formData,
-        userId: 'current-user-id' // This would come from auth context in real app
+        userId: user.id
       });
       setShowAddForm(false);
     } catch (error) {

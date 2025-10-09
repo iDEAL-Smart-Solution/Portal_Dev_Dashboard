@@ -22,18 +22,25 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({
         <div className="flex items-center space-x-3">
           {school.schoolLogoFilePath ? (
             <img
-              src={school.schoolLogoFilePath}
+              src={`http://localhost:5093/${school.schoolLogoFilePath}`}
               alt={`${school.schoolName} logo`}
               className="w-12 h-12 rounded-lg object-cover"
+              onError={(e) => {
+                // Fallback to initial if image fails to load
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
             />
-          ) : (
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-              style={{ backgroundColor: school.colorCode || '#6B7280' }}
-            >
-              {school.schoolName.charAt(0).toUpperCase()}
-            </div>
-          )}
+          ) : null}
+          <div
+            className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg ${
+              school.schoolLogoFilePath ? 'hidden' : ''
+            }`}
+            style={{ backgroundColor: school.colorCode || '#6B7280' }}
+          >
+            {school.schoolName.charAt(0).toUpperCase()}
+          </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{school.schoolName}</h3>
             <div className="flex items-center space-x-2">
