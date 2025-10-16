@@ -95,7 +95,7 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
         formData.append('Email', schoolData.email);
       }
 
-      const response = await axiosInstance.post('/School/create', formData, {
+        await axiosInstance.post('/School/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
