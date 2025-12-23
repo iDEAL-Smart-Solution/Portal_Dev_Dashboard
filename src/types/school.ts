@@ -7,6 +7,7 @@ export interface CreateSchoolRequest {
   address?: string;
   phoneNumber?: string;
   email?: string;
+  domain?: string;
   userId: string;
 }
 
@@ -18,6 +19,7 @@ export interface UpdateSchoolRequest {
   address?: string;
   phoneNumber?: string;
   email?: string;
+  domain?: string;
   isSubscrptionActive: boolean;
   userId: string;
 }
@@ -30,6 +32,7 @@ export interface GetSchoolResponse {
   address?: string;
   phoneNumber?: string;
   email?: string;
+  domain?: string;
   isSubscrptionActive: boolean;
   userId?: string;
   createdAt?: string;
@@ -43,6 +46,7 @@ export interface SchoolFormData {
   address?: string;
   phoneNumber?: string;
   email?: string;
+  domain?: string;
 }
 
 export interface SubscriptionResponse {
@@ -66,4 +70,11 @@ export interface GetSingleSchoolWithSubs {
 
 export interface SchoolSubscriptionData {
   isSubscrptionActive: boolean;
+}
+
+export interface UpdateSubscriptionRequest {
+  id: string;
+  allowedStudentCount: number;
+  registeredStudentCount: number;
+  amountPaid: number;
 }

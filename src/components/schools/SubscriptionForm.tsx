@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { SchoolSubscriptionData, GetSchoolResponse } from '../../types/school';
+import { UpdateSubscriptionRequest, GetSingleSchoolWithSubs } from '../../types/school';
 
 interface SubscriptionFormProps {
-  school: GetSchoolResponse;
-  onSubmit: (data: SchoolSubscriptionData) => void;
+  school: GetSingleSchoolWithSubs;
+  onSubmit: (data: UpdateSubscriptionRequest) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -14,11 +14,64 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
   onCancel,
   isLoading = false
 }) => {
-  const [isActive, setIsActive] = useState(school.isSubscrptionActive);
+  const [allowedStudentCount, setAllowedStudentCount] = useState(school.schoolSubscription?.allowedStudentCount || 0);
+  const [registeredStudentCount, setRegisteredStudentCount] = useState(school.schoolSubscription?.registeredStudentCount || 0);
+  const [amountPaid, setAmountPaid] = useState(school.schoolSubscription?.amountPaid || 0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Safety check
+  if (!school.schoolSubscription) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="text-center py-8">
+          <p className="text-red-600 font-medium">Error: Subscription data not available</p>
+          <button
+            onClick={onCancel}
+            className="mt-4 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (allowedStudentCount <= 0) {
+      newErrors.allowedStudentCount = 'Allowed student count must be greater than 0';
+    }
+
+    if (registeredStudentCount < 0) {
+      newErrors.registeredStudentCount = 'Registered student count cannot be negative';
+    }
+
+    if (registeredStudentCount > allowedStudentCount) {
+      newErrors.registeredStudentCount = 'Registered students cannot exceed allowed count';
+    }
+
+    if (amountPaid < 0) {
+      newErrors.amountPaid = 'Amount paid cannot be negative';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ isSubscrptionActive: isActive });
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    await onSubmit({
+      id: school.schoolSubscription.id,
+      allowedStudentCount,
+      registeredStudentCount,
+      amountPaid
+    });
   };
 
   return (
@@ -53,83 +106,96 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
           </div>
         </div>
 
-        {/* Subscription Toggle */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Subscription Status
-          </label>
-          <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              onClick={() => setIsActive(true)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md border transition-colors duration-200 ${
-                isActive
-                  ? 'bg-green-50 border-green-200 text-green-800'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-              <span className="font-medium">Active</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsActive(false)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md border transition-colors duration-200 ${
-                !isActive
-                  ? 'bg-red-50 border-red-200 text-red-800'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className={`w-3 h-3 rounded-full ${!isActive ? 'bg-red-500' : 'bg-gray-300'}`}></div>
-              <span className="font-medium">Inactive</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Status Change Warning */}
-        {isActive !== school.isSubscrptionActive && (
-          <div className={`rounded-lg p-4 ${
-            isActive 
-              ? 'bg-green-50 border border-green-200' 
-              : 'bg-red-50 border border-red-200'
-          }`}>
-            <div className="flex items-start space-x-3">
-              <svg 
-                className={`w-5 h-5 mt-0.5 ${
-                  isActive ? 'text-green-600' : 'text-red-600'
-                }`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d={isActive 
-                    ? "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
-                    : "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                  } 
-                />
-              </svg>
-              <div>
-                <h4 className={`font-medium ${
-                  isActive ? 'text-green-800' : 'text-red-800'
+        {/* Student Usage Info */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-blue-900 mb-3">Student Usage</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700">Registered Students</span>
+              <span className="text-sm font-semibold text-blue-900">{school.schoolSubscription.registeredStudentCount}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-blue-700">Allowed Students</span>
+              <span className="text-sm font-semibold text-blue-900">{school.schoolSubscription.allowedStudentCount}</span>
+            </div>
+            <div className="pt-2 border-t border-blue-200">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-blue-700">Available Slots</span>
+                <span className={`text-sm font-semibold ${
+                  school.schoolSubscription.allowedStudentCount - school.schoolSubscription.registeredStudentCount > 0
+                    ? 'text-green-600'
+                    : 'text-red-600'
                 }`}>
-                  {isActive ? 'Activating Subscription' : 'Deactivating Subscription'}
-                </h4>
-                <p className={`text-sm mt-1 ${
-                  isActive ? 'text-green-700' : 'text-red-700'
-                }`}>
-                  {isActive 
-                    ? 'This will grant the school access to all features and services.'
-                    : 'This will restrict the school\'s access to limited features only.'
-                  }
-                </p>
+                  {school.schoolSubscription.allowedStudentCount - school.schoolSubscription.registeredStudentCount}
+                </span>
               </div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Allowed Student Count */}
+        <div>
+          <label htmlFor="allowedStudentCount" className="block text-sm font-medium text-gray-700 mb-2">
+            Allowed Student Count
+          </label>
+          <input
+            type="number"
+            id="allowedStudentCount"
+            min="1"
+            value={allowedStudentCount}
+            onChange={(e) => setAllowedStudentCount(Number(e.target.value))}
+            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              errors.allowedStudentCount ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {errors.allowedStudentCount && (
+            <p className="mt-1 text-sm text-red-600">{errors.allowedStudentCount}</p>
+          )}
+        </div>
+
+        {/* Registered Student Count */}
+        <div>
+          <label htmlFor="registeredStudentCount" className="block text-sm font-medium text-gray-700 mb-2">
+            Registered Student Count
+          </label>
+          <input
+            type="number"
+            id="registeredStudentCount"
+            min="0"
+            value={registeredStudentCount}
+            onChange={(e) => setRegisteredStudentCount(Number(e.target.value))}
+            className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              errors.registeredStudentCount ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {errors.registeredStudentCount && (
+            <p className="mt-1 text-sm text-red-600">{errors.registeredStudentCount}</p>
+          )}
+        </div>
+
+        {/* Amount Paid */}
+        <div>
+          <label htmlFor="amountPaid" className="block text-sm font-medium text-gray-700 mb-2">
+            Amount Paid
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-2.5 text-gray-500">₦</span>
+            <input
+              type="number"
+              id="amountPaid"
+              min="0"
+              step="0.01"
+              value={amountPaid}
+              onChange={(e) => setAmountPaid(Number(e.target.value))}
+              className={`w-full pl-8 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.amountPaid ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+          </div>
+          {errors.amountPaid && (
+            <p className="mt-1 text-sm text-red-600">{errors.amountPaid}</p>
+          )}
+        </div>
 
         {/* Form Actions */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
@@ -142,7 +208,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
           </button>
           <button
             type="submit"
-            disabled={isLoading || isActive === school.isSubscrptionActive}
+            disabled={isLoading}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
             {isLoading ? 'Updating...' : 'Update Subscription'}

@@ -22,7 +22,8 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
     colorCode: '#4F46E5',
     address: '',
     phoneNumber: '',
-    email: ''
+    email: '',
+    domain: ''
   });
   
   const [logoPreview, setLogoPreview] = useState<string>('');
@@ -37,7 +38,8 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
         colorCode: school.colorCode || '#4F46E5',
         address: school.address || '',
         phoneNumber: school.phoneNumber || '',
-        email: school.email || ''
+        email: school.email || '',
+        domain: school.domain || ''
       });
       // Set preview for existing logo
       if (school.schoolLogoFilePath) {
@@ -132,6 +134,21 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email}</p>
           )}
+        </div>
+
+        {/* Domain */}
+        <div>
+          <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-2">
+            Domain
+          </label>
+          <input
+            type="text"
+            id="domain"
+            value={formData.domain}
+            onChange={(e) => handleInputChange('domain', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter school domain (e.g., school.edu)"
+          />
         </div>
 
         {/* Phone Number */}

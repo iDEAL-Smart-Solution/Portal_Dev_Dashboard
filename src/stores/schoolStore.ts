@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GetSchoolResponse, CreateSchoolRequest, UpdateSchoolRequest, GetSingleSchoolWithSubs } from '../types/school';
+import { GetSchoolResponse, CreateSchoolRequest, UpdateSchoolRequest, GetSingleSchoolWithSubs, UpdateSubscriptionRequest } from '../types/school';
 import axiosInstance from '../config/axios';
 
 
@@ -16,7 +16,7 @@ interface SchoolState {
   getSchoolById: (id: string) => GetSchoolResponse | undefined;
   createSchool: (schoolData: CreateSchoolRequest) => Promise<void>;
   updateSchool: (schoolData: UpdateSchoolRequest) => Promise<void>;
-  updateSchoolSubscription: (id: string, isActive: boolean) => Promise<void>;
+  updateSchoolSubscription: (data: UpdateSubscriptionRequest) => Promise<void>;
   setSelectedSchool: (school: GetSchoolResponse | null) => void;
   clearError: () => void;
 }
@@ -50,8 +50,11 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
   fetchSchoolById: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
+      console.log('Fetching school with ID:', id);
       const response = await axiosInstance.get(`/School/get-by-id?id=${id}`);
-      const schoolDetails: GetSingleSchoolWithSubs = response.data.data;
+      // Handle both response.data.data and response.data structures
+      const schoolDetails: GetSingleSchoolWithSubs = response.data.data || response.data;
+      console.log('Fetched school details:', schoolDetails);
       set({ selectedSchoolDetails: schoolDetails, isLoading: false });
     } catch (error: any) {
       let errorMessage = 'Failed to fetch school details';
@@ -62,6 +65,7 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
         errorMessage = error.message;
       }
       
+      console.error('Error fetching school by ID:', error);
       set({ error: errorMessage, isLoading: false, selectedSchoolDetails: null });
     }
   },
@@ -141,25 +145,24 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
     }
   },
 
-  updateSchoolSubscription: async (id: string, isActive: boolean) => {
+  updateSchoolSubscription: async (data: UpdateSubscriptionRequest) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await axiosInstance.put('/Subscription/update-subscription', data);
+      console.log('Subscription updated successfully:', response.data);
+      set({ isLoading: false });
+    } catch (error: any) {
+      let errorMessage = 'Failed to update subscription';
       
-      set(state => ({
-        schools: state.schools.map(school =>
-          school.id === id
-            ? { ...school, isSubscrptionActive: isActive, updatedAt: new Date().toISOString() }
-            : school
-        ),
-        selectedSchool: state.selectedSchool?.id === id
-          ? { ...state.selectedSchool, isSubscrptionActive: isActive, updatedAt: new Date().toISOString() }
-          : state.selectedSchool,
-        isLoading: false
-      }));
-    } catch (error) {
-      set({ error: 'Failed to update subscription', isLoading: false });
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.error('Error updating subscription:', error);
+      set({ error: errorMessage, isLoading: false });
+      throw error;
     }
   },
 

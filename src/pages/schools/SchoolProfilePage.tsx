@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../stores/schoolStore';
 import { SubscriptionDetails } from '../../components/schools/SubscriptionDetails';
 import { SubscriptionForm } from '../../components/schools/SubscriptionForm';
-import { SchoolSubscriptionData } from '../../types/school';
+import { UpdateSubscriptionRequest } from '../../types/school';
 
 interface SchoolProfilePageProps {
   schoolId: string;
@@ -26,16 +26,36 @@ export const SchoolProfilePage: React.FC<SchoolProfilePageProps> = ({ schoolId }
     fetchSchoolById(schoolId);
   }, [schoolId, fetchSchoolById]);
 
-  const handleUpdateSubscription = async (data: SchoolSubscriptionData) => {
+  const handleUpdateSubscription = async (data: UpdateSubscriptionRequest) => {
     if (!selectedSchoolDetails) return;
     
     try {
-      await updateSchoolSubscription(schoolId, data.isSubscrptionActive);
-      // Refresh school details
-      await fetchSchoolById(schoolId);
+      await updateSchoolSubscription(data);
+      // Close modal immediately
       setShowSubscriptionForm(false);
+      
+      // Optimistic UI update - update local state immediately
+      const updatedSchoolDetails = {
+        ...selectedSchoolDetails,
+        schoolSubscription: {
+          ...selectedSchoolDetails.schoolSubscription,
+          allowedStudentCount: data.allowedStudentCount,
+          registeredStudentCount: data.registeredStudentCount,
+          amountPaid: data.amountPaid
+        }
+      };
+      
+      // Update the store directly for instant UI feedback
+      useSchoolStore.setState({ selectedSchoolDetails: updatedSchoolDetails });
+      
+      // Fetch fresh data in background (non-blocking)
+      fetchSchoolById(schoolId).catch(err => {
+        console.warn('Background refresh failed:', err);
+        // If background refresh fails, keep the optimistic update
+      });
     } catch (error) {
       console.error('Failed to update subscription:', error);
+      setShowSubscriptionForm(false);
     }
   };
 
@@ -187,7 +207,7 @@ export const SchoolProfilePage: React.FC<SchoolProfilePageProps> = ({ schoolId }
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
               <SubscriptionForm
-                school={{ isSubscrptionActive: selectedSchoolDetails.isSubscrptionActive } as any}
+                school={selectedSchoolDetails}
                 onSubmit={handleUpdateSubscription}
                 onCancel={() => setShowSubscriptionForm(false)}
                 isLoading={isLoading}
