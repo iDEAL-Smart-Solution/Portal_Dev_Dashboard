@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5093/api/';
-// const BASE_URL = 'https://ideal-portal-djhvgncsgdb6fxc5.westus-01.azurewebsites.net/api/';
+// const BASE_URL = 'http://localhost:5093/api/';
+export const BASE_URL = "https://portal-api.idealsmartsolutions.com/api";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
