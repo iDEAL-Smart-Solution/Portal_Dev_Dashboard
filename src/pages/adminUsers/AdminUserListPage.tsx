@@ -53,7 +53,7 @@ export const AdminUserListPage: React.FC = () => {
       await updateAdminUser({
         ...formData,
         id: editingUser.id,
-        schoolId: editingUser.schoolId
+        schoolId: editingUser.schoolId || ''
       });
       setEditingUser(null);
     } catch (error) {

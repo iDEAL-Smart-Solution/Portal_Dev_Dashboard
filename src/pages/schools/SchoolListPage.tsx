@@ -51,10 +51,16 @@ export const SchoolListPage: React.FC = () => {
     
     try {
       await updateSchool({
-        ...formData,
         id: editingSchool.id,
+        schoolName: formData.schoolName,
+        schoolLogoFilePath: typeof formData.schoolLogoFilePath === 'string' ? formData.schoolLogoFilePath : undefined,
+        colorCode: formData.colorCode,
+        address: formData.address,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        domain: formData.domain,
         isSubscrptionActive: editingSchool.isSubscrptionActive,
-        userId: editingSchool.userId
+        userId: editingSchool.userId || ''
       });
       setEditingSchool(null);
     } catch (error) {
@@ -64,7 +70,12 @@ export const SchoolListPage: React.FC = () => {
 
   const handleToggleSubscription = async (school: GetSchoolResponse) => {
     try {
-      await updateSchoolSubscription(school.id, !school.isSubscrptionActive);
+      await updateSchoolSubscription({
+        id: school.id,
+        allowedStudentCount: 0,
+        registeredStudentCount: 0,
+        amountPaid: 0
+      });
     } catch (error) {
       console.error('Failed to toggle subscription:', error);
     }
