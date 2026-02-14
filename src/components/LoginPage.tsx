@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import logo from '../assets/logo.jpg';
 import { useAuthStore } from '../stores/authStore';
 import { LoginRequest } from '../types/auth';
 
@@ -29,9 +28,9 @@ const LoginPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <img 
-            src={logo} 
+            src="/logo.png" 
             alt="iDEAL Smart Solution Limited" 
-            className="w-16 h-16 object-contain"
+            className="h-16 w-auto object-contain"
           />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
