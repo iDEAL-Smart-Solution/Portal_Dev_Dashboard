@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import axiosInstance from '../config/axios';
 import { LoginRequest, GetUser } from '../types/auth';
 
@@ -96,6 +96,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => sessionStorage),
       // Only persist essential data, not sensitive information
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,

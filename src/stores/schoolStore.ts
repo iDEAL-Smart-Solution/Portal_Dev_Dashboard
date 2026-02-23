@@ -98,6 +98,9 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
       if (schoolData.email) {
         formData.append('Email', schoolData.email);
       }
+      if (schoolData.domain) {
+        formData.append('Domain', schoolData.domain);
+      }
 
         await axiosInstance.post('/School/create', formData, {
         headers: {
@@ -123,25 +126,21 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
     }
   },
 
-  updateSchool: async (schoolData: UpdateSchoolRequest) => {
+    updateSchool: async (schoolData: UpdateSchoolRequest) => {
     set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      set(state => ({
-        schools: state.schools.map(school =>
-          school.id === schoolData.id
-            ? { ...school, ...schoolData, updatedAt: new Date().toISOString() }
-            : school
-        ),
-        selectedSchool: state.selectedSchool?.id === schoolData.id
-          ? { ...state.selectedSchool, ...schoolData, updatedAt: new Date().toISOString() }
-          : state.selectedSchool,
-        isLoading: false
-      }));
-    } catch (error) {
-      set({ error: 'Failed to update school', isLoading: false });
+      await axiosInstance.put('/School/update', schoolData);
+      await get().fetchSchools();
+      set({ isLoading: false });
+    } catch (error: any) {
+      let errorMessage = 'Failed to update school';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      set({ error: errorMessage, isLoading: false });
+      throw error;
     }
   },
 
