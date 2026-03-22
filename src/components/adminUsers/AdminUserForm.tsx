@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AdminUserFormData, GetAdminUserResponse } from '../../types/adminUser';
 import { useSchoolStore } from '../../stores/schoolStore';
+import { resolveMediaUrl } from '../../config/media';
 
 interface AdminUserFormProps {
   user?: GetAdminUserResponse;
@@ -52,7 +53,7 @@ export const AdminUserForm: React.FC<AdminUserFormProps> = ({
         profilePicture: null
       });
       if (user.profilePictureUrl) {
-        setProfilePreview(`http://localhost:5093/${user.profilePictureUrl}`);
+        setProfilePreview(resolveMediaUrl(user.profilePictureUrl));
       }
     }
   }, [user, mode]);

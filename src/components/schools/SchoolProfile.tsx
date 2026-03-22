@@ -1,6 +1,7 @@
 import React from 'react';
 import { GetSchoolResponse } from '../../types/school';
 import { Edit3, Power } from 'lucide-react';
+import { resolveMediaUrl } from '../../config/media';
 
 interface SchoolProfileProps {
   school: GetSchoolResponse;
@@ -20,7 +21,7 @@ export const SchoolProfile: React.FC<SchoolProfileProps> = ({
         <div className="flex items-center space-x-4">
           {school.schoolLogoFilePath ? (
             <img
-              src={`http://localhost:5093/${school.schoolLogoFilePath}`}
+              src={resolveMediaUrl(school.schoolLogoFilePath)}
 
               alt={`${school.schoolName} logo`}
               className="w-16 h-16 rounded-lg object-cover"

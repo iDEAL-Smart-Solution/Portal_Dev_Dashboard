@@ -1,6 +1,7 @@
 import React from 'react';
 import { GetSchoolResponse } from '../../types/school';
 import { Eye, Edit3, Power } from 'lucide-react';
+import { resolveMediaUrl } from '../../config/media';
 
 interface SchoolCardProps {
   school: GetSchoolResponse;
@@ -22,7 +23,7 @@ export const SchoolCard: React.FC<SchoolCardProps> = ({
         <div className="flex items-center space-x-3">
           {school.schoolLogoFilePath ? (
             <img
-              src={`http://localhost:5093/${school.schoolLogoFilePath}`}
+              src={resolveMediaUrl(school.schoolLogoFilePath)}
               alt={`${school.schoolName} logo`}
               className="w-12 h-12 rounded-lg object-cover"
               onError={(e) => {

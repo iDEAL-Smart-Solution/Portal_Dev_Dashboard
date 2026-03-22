@@ -4,6 +4,7 @@ import { useSchoolStore } from '../../stores/schoolStore';
 import { SubscriptionDetails } from '../../components/schools/SubscriptionDetails';
 import { SubscriptionForm } from '../../components/schools/SubscriptionForm';
 import { UpdateSubscriptionRequest } from '../../types/school';
+import { resolveMediaUrl } from '../../config/media';
 
 interface SchoolProfilePageProps {
   schoolId: string;
@@ -141,7 +142,7 @@ export const SchoolProfilePage: React.FC<SchoolProfilePageProps> = ({ schoolId }
             <div className="flex items-center space-x-4">
               {selectedSchoolDetails.schoolLogoFilePath ? (
                 <img
-                  src={`http://localhost:5093/${selectedSchoolDetails.schoolLogoFilePath}`}
+                  src={resolveMediaUrl(selectedSchoolDetails.schoolLogoFilePath)}
                   alt={`${selectedSchoolDetails.schoolName} logo`}
                   className="w-20 h-20 rounded-lg object-cover"
                 />

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminUserStore } from '../../stores/adminUserStore';
 import { useAuthStore } from '../../stores/authStore';
-import { AdminUserCard } from '../../components/adminUsers/AdminUserCard';
+import { Eye, Edit3 } from 'lucide-react';
 import { AdminUserForm } from '../../components/adminUsers/AdminUserForm';
 import { AdminUserFormData, GetAdminUserResponse } from '../../types/adminUser';
+import { resolveMediaUrl } from '../../config/media';
 
 export const AdminUserListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -210,7 +211,7 @@ export const AdminUserListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Users Grid */}
+        {/* Users Table */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -240,15 +241,88 @@ export const AdminUserListPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers.map((user) => (
-              <AdminUserCard
-                key={user.id}
-                user={user}
-                onViewProfile={handleViewProfile}
-                onEdit={handleEdit}
-              />
-            ))}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      UIN
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      School
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Gender
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-3">
+                          {user.profilePictureUrl ? (
+                            <img
+                              src={resolveMediaUrl(user.profilePictureUrl)}
+                              alt={user.name}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                                user.gender === 'Male' ? 'bg-blue-600' : 'bg-pink-600'
+                              }`}
+                            >
+                              {user.firstName?.charAt(0).toUpperCase() || user.name.charAt(0).toUpperCase()}
+                              {user.lastName?.charAt(0).toUpperCase() || user.name.charAt(1)?.toUpperCase() || ''}
+                            </div>
+                          )}
+                          <span className="text-sm font-medium text-gray-900">{user.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{user.uin}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{user.schoolName}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{user.email}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{user.phoneNumber}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{user.gender || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={() => handleViewProfile(user)}
+                            className="text-blue-600 hover:text-blue-700 p-1 transition-colors duration-200"
+                            title="View Profile"
+                            aria-label="View Profile"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(user)}
+                            className="text-gray-600 hover:text-gray-700 p-1 transition-colors duration-200"
+                            title="Edit Admin User"
+                            aria-label="Edit Admin User"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

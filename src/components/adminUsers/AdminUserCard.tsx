@@ -1,6 +1,7 @@
 import React from 'react';
 import { GetAdminUserResponse } from '../../types/adminUser';
 import { Eye, Edit3, UserCheck } from 'lucide-react';
+import { resolveMediaUrl } from '../../config/media';
 
 interface AdminUserCardProps {
   user: GetAdminUserResponse;
@@ -20,7 +21,7 @@ export const AdminUserCard: React.FC<AdminUserCardProps> = ({
         <div className="flex items-center space-x-3">
           {user.profilePictureUrl ? (
             <img
-              src={`http://localhost:5093/${user.profilePictureUrl}`}
+              src={resolveMediaUrl(user.profilePictureUrl)}
               alt={`${user.firstName} ${user.lastName}`}
               className="w-12 h-12 rounded-full object-cover"
               onError={(e) => {

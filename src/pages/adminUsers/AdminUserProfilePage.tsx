@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminUserStore } from '../../stores/adminUserStore';
 import { AdminUserForm } from '../../components/adminUsers/AdminUserForm';
 import { AdminUserFormData } from '../../types/adminUser';
+import { resolveMediaUrl } from '../../config/media';
 
 interface AdminUserProfilePageProps {
   userId: string;
@@ -155,7 +156,7 @@ export const AdminUserProfilePage: React.FC<AdminUserProfilePageProps> = ({ user
             <div className="flex items-center space-x-4">
               {selectedAdminUser.profilePictureUrl ? (
                 <img
-                  src={`http://localhost:5093/${selectedAdminUser.profilePictureUrl}`}
+                  src={resolveMediaUrl(selectedAdminUser.profilePictureUrl)}
                   alt={selectedAdminUser.name}
                   className="w-20 h-20 rounded-full object-cover"
                 />

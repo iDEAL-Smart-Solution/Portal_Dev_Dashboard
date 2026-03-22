@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../stores/schoolStore';
 import { useAuthStore } from '../../stores/authStore';
-import { SchoolCard } from '../../components/schools/SchoolCard';
+import { Eye, Edit3, Power } from 'lucide-react';
 import { SchoolForm } from '../../components/schools/SchoolForm';
 import { SchoolFormData, GetSchoolResponse } from '../../types/school';
+import { resolveMediaUrl } from '../../config/media';
 
 export const SchoolListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -227,7 +228,7 @@ export const SchoolListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Schools Grid */}
+        {/* Schools Table */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -257,16 +258,107 @@ export const SchoolListPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredSchools.map((school) => (
-              <SchoolCard
-                key={school.id}
-                school={school}
-                onViewProfile={handleViewProfile}
-                onEdit={handleEdit}
-                onToggleSubscription={handleToggleSubscription}
-              />
-            ))}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      School
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Address
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredSchools.map((school) => (
+                    <tr key={school.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-3">
+                          {school.schoolLogoFilePath ? (
+                            <img
+                              src={resolveMediaUrl(school.schoolLogoFilePath)}
+                              alt={`${school.schoolName} logo`}
+                              className="w-10 h-10 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                              style={{ backgroundColor: school.colorCode || '#6B7280' }}
+                            >
+                              {school.schoolName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{school.schoolName}</p>
+                            {school.domain && <p className="text-xs text-gray-500">{school.domain}</p>}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{school.email || '-'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{school.phoneNumber || '-'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={school.address || '-'}>
+                        {school.address || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            school.isSubscrptionActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {school.isSubscrptionActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            onClick={() => handleViewProfile(school)}
+                            className="text-blue-600 hover:text-blue-700 p-1 transition-colors duration-200"
+                            title="View Profile"
+                            aria-label="View Profile"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(school)}
+                            className="text-gray-600 hover:text-gray-700 p-1 transition-colors duration-200"
+                            title="Edit School"
+                            aria-label="Edit School"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleToggleSubscription(school)}
+                            className={`p-1 transition-colors duration-200 ${
+                              school.isSubscrptionActive
+                                ? 'text-red-600 hover:text-red-700'
+                                : 'text-green-600 hover:text-green-700'
+                            }`}
+                            title={school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
+                            aria-label={school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
+                          >
+                            <Power className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

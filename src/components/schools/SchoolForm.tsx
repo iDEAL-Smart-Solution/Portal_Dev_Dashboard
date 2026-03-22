@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SchoolFormData, GetSchoolResponse } from '../../types/school';
+import { resolveMediaUrl } from '../../config/media';
 
 interface SchoolFormProps {
   school?: GetSchoolResponse;
@@ -43,7 +44,7 @@ export const SchoolForm: React.FC<SchoolFormProps> = ({
       });
       // Set preview for existing logo
       if (school.schoolLogoFilePath) {
-        setLogoPreview(`http://localhost:5093/ProfilePicture/${school.schoolLogoFilePath}`);
+        setLogoPreview(resolveMediaUrl(school.schoolLogoFilePath));
       }
     }
   }, [school, mode]);
