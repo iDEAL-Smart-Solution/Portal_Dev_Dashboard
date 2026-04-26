@@ -3,6 +3,11 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import axiosInstance from '../config/axios';
 import { LoginRequest, GetUser } from '../types/auth';
 
+const isDevRole = (role?: string) => {
+  const normalizedRole = role?.trim().toLowerCase();
+  return normalizedRole === 'dev' || normalizedRole === 'developer';
+};
+
 interface AuthState {
   isAuthenticated: boolean;
   user: GetUser | null;
@@ -31,6 +36,21 @@ export const useAuthStore = create<AuthState>()(
           const { success, data, message } = response.data;
 
           if (success && data) {
+            if (!isDevRole(data.user.role)) {
+              sessionStorage.removeItem('token');
+              sessionStorage.removeItem('SchoolId');
+
+              set({
+                isAuthenticated: false,
+                user: null,
+                token: null,
+                isLoading: false,
+                error: 'Access denied. Only Developer accounts can access this dashboard.',
+              });
+
+              return false;
+            }
+
             // Store token and school ID in session storage
             sessionStorage.setItem('token', data.token);
             if (data.user.schoolId) {
@@ -97,6 +117,16 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => sessionStorage),
+      onRehydrateStorage: () => (state) => {
+        if (!state?.user || isDevRole(state.user.role)) {
+          return;
+        }
+
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('SchoolId');
+
+        state.logout();
+      },
       // Only persist essential data, not sensitive information
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,

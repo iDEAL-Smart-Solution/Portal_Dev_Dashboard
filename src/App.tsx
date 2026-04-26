@@ -8,6 +8,11 @@ import LoginPage from './components/LoginPage';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/Layout';
 
+const isDevRole = (role?: string) => {
+  const normalizedRole = role?.trim().toLowerCase();
+  return normalizedRole === 'dev' || normalizedRole === 'developer';
+};
+
 // Wrapper component to handle route parameters
 const SchoolProfileWrapper: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +26,20 @@ const AdminUserProfileWrapper: React.FC = () => {
 };
 
 function App() {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  if (isAuthenticated && user && !isDevRole(user.role)) {
+    logout();
+    return (
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Routes>
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    );
+  }
 
   return (
     <Router>
