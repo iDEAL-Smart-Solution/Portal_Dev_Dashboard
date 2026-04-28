@@ -7,6 +7,7 @@ import { AdminUserProfilePage } from './pages/adminUsers/AdminUserProfilePage';
 import LoginPage from './components/LoginPage';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/Layout';
+import { Toaster } from 'sonner';
 
 const isDevRole = (role?: string) => {
   const normalizedRole = role?.trim().toLowerCase();
@@ -61,6 +62,7 @@ function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         )}
+        <Toaster position="top-right" richColors closeButton duration={3500} />
       </div>
     </Router>
   );

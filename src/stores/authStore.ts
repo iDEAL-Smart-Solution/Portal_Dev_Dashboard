@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import axiosInstance from '../config/axios';
 import { LoginRequest, GetUser } from '../types/auth';
+import { showError } from '../lib/notifications';
 
 const isDevRole = (role?: string) => {
   const normalizedRole = role?.trim().toLowerCase();
@@ -48,6 +49,8 @@ export const useAuthStore = create<AuthState>()(
                 error: 'Access denied. Only Developer accounts can access this dashboard.',
               });
 
+              showError('Access denied. Only Developer accounts can access this dashboard.');
+
               return false;
             }
 
@@ -74,6 +77,8 @@ export const useAuthStore = create<AuthState>()(
               isLoading: false,
               error: message || 'Login failed',
             });
+
+            showError(message || 'Login failed');
             return false;
           }
         } catch (error: any) {
@@ -92,6 +97,8 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: errorMessage,
           });
+
+          showError(errorMessage);
           
           return false;
         }
