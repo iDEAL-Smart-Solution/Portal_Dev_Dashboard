@@ -35,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-white border-r border-gray-200 w-80">
+    <div className="flex flex-col h-screen bg-background-primary border-r border-border w-80 shadow-soft">
       {/* Logo and Brand */}
       <div className="flex items-center px-6 py-4 border-b border-gray-200">
         <img 
@@ -61,11 +61,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             to={item.href}
             className={`flex items-start p-4 rounded-lg transition-colors duration-200 group ${
               item.active
-                ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-primary-50 text-primary-700 border border-primary-200 shadow-soft'
+                : 'text-text-secondary hover:bg-neutral-50 hover:text-text-primary'
             }`}
           >
-            <div className={`flex-shrink-0 mr-3 ${item.active ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-600'}`}>
+            <div className={`flex-shrink-0 mr-3 ${item.active ? 'text-primary-500' : 'text-neutral-400 group-hover:text-text-secondary'}`}>
               {item.icon}
             </div>
             <div className="flex-1 min-w-0">
@@ -91,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         </div>
         <button
           onClick={onLogout}
-          className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+          className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-accent-500 hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-colors duration-200 shadow-soft"
         >
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

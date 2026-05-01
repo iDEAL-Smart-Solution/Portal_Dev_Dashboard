@@ -33,7 +33,7 @@ function App() {
     logout();
     return (
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background-secondary text-text-primary">
           <Routes>
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
@@ -44,7 +44,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background-secondary text-text-primary">
         {isAuthenticated ? (
           <Layout onLogout={logout}>
             <Routes>
