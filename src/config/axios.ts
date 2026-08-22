@@ -26,6 +26,10 @@ const isAuthLoginRequest = (config?: any) => {
   return requestUrl.includes('/auth/login');
 };
 
+const shouldSkipErrorToast = (config?: any) => {
+  return config?.headers?.['X-Skip-Error-Toast'] === 'true';
+};
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('token');
@@ -82,7 +86,9 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    showError(getErrorMessage(error));
+    if (!shouldSkipErrorToast(error?.config)) {
+      showError(getErrorMessage(error));
+    }
     return Promise.reject(error);
   }
 );
