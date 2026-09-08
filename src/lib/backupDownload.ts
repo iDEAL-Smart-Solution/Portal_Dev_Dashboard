@@ -1,12 +1,7 @@
-import axiosInstance from '../config/axios';
-import { showSuccess } from './notifications';
-
-type BackupDownloadResult = {
+export type BackupDownloadResult = {
   blob: Blob;
   filename: string;
 };
-
-const BACKUP_ENDPOINT = '/BackupDataBase/backup';
 
 const getFilenameFromDisposition = (contentDisposition?: string | null) => {
   if (!contentDisposition) return null;
@@ -29,29 +24,21 @@ const getExtensionFromFilename = (filename: string) => {
   return lastDotIndex >= 0 ? filename.slice(lastDotIndex) : '';
 };
 
-const getFallbackFilename = (extension?: string) => {
-  const date = new Date().toISOString().slice(0, 10);
+const getFallbackFilename = (extension: string | undefined, date: string) => {
   return `database-backup-${date}${extension || ''}`;
 };
 
-export const downloadDatabaseBackup = async (): Promise<BackupDownloadResult> => {
-  const response = await axiosInstance.post(BACKUP_ENDPOINT, {}, {
-    responseType: 'blob',
-    headers: {
-      'X-Skip-Error-Toast': 'true',
-    },
-  });
-
-  const contentDisposition = response.headers?.['content-disposition'];
+export const parseDatabaseBackupResponse = (
+  blob: Blob,
+  contentDisposition: string | null | undefined,
+  fallbackDate: string
+): BackupDownloadResult => {
   const filenameFromHeader = getFilenameFromDisposition(contentDisposition);
   const extensionFromHeader = filenameFromHeader ? getExtensionFromFilename(filenameFromHeader) : '';
-  const fallbackFilename = getFallbackFilename(extensionFromHeader);
-  const filename = filenameFromHeader || fallbackFilename;
-
-  showSuccess('Backup download started successfully.');
+  const fallbackFilename = getFallbackFilename(extensionFromHeader, fallbackDate);
 
   return {
-    blob: response.data,
-    filename,
+    blob,
+    filename: filenameFromHeader || fallbackFilename,
   };
 };

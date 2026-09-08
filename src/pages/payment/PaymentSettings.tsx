@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Download, ShieldAlert } from 'lucide-react';
 import axiosInstance from '../../config/axios';
-import { downloadDatabaseBackup } from '../../lib/backupDownload';
 import { showError } from '../../lib/notifications';
+import { useBackupStore } from '../../stores/backupStore';
 
 type Bank = {
   id: number;
@@ -36,6 +36,8 @@ type ResolvedAccount = {
 };
 
 export default function PaymentSettings() {
+  const downloadDatabaseBackup = useBackupStore((state) => state.downloadDatabaseBackup);
+  const backingUp = useBackupStore((state) => state.isLoading);
   const [schools, setSchools] = useState<School[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(true);
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
@@ -48,7 +50,6 @@ export default function PaymentSettings() {
   const [resolving, setResolving] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [resolvedAccount, setResolvedAccount] = useState<ResolvedAccount | null>(null);
-  const [backingUp, setBackingUp] = useState(false);
 
   useEffect(() => {
     fetchSchools();
@@ -173,8 +174,6 @@ export default function PaymentSettings() {
   const handleBackupDatabase = async () => {
     if (backingUp) return;
 
-    setBackingUp(true);
-
     try {
       const { blob, filename } = await downloadDatabaseBackup();
       triggerBrowserDownload(blob, filename);
@@ -185,8 +184,6 @@ export default function PaymentSettings() {
 
       showError(message);
       console.error('Database backup download failed:', error);
-    } finally {
-      setBackingUp(false);
     }
   };
 
