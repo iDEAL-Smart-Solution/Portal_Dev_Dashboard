@@ -17,6 +17,7 @@ interface SchoolState {
   createSchool: (schoolData: CreateSchoolRequest) => Promise<void>;
   updateSchool: (schoolData: UpdateSchoolRequest) => Promise<void>;
   updateSchoolSubscription: (data: UpdateSubscriptionRequest) => Promise<void>;
+  deleteSchool: (id: string, confirmationText: string) => Promise<void>;
   setSelectedSchool: (school: GetSchoolResponse | null) => void;
   clearError: () => void;
 }
@@ -160,6 +161,29 @@ export const useSchoolStore = create<SchoolState>((set, get) => ({
       }
       
       console.error('Error updating subscription:', error);
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  deleteSchool: async (id: string, confirmationText: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await axiosInstance.delete('/School/delete', {
+        data: { id, confirmationText },
+      });
+      // Remove the deleted school from local state immediately
+      set((state) => ({
+        schools: state.schools.filter((s) => s.id !== id),
+        isLoading: false,
+      }));
+    } catch (error: any) {
+      let errorMessage = 'Failed to delete school';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
       set({ error: errorMessage, isLoading: false });
       throw error;
     }

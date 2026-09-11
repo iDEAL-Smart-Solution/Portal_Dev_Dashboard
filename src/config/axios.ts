@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getErrorMessage, showError, showSuccess } from '../lib/notifications';
 
-// const BASE_URL = 'http://localhost:5093/api/';
-export const BASE_URL = "https://portal-api.idealsmartsolutions.com/api";
+const BASE_URL = 'http://localhost:5093/api/';
+// export const BASE_URL = "https://portal-api.idealsmartsolutions.com/api";
 
 const isDevRole = (role?: string) => {
   const normalizedRole = role?.trim().toLowerCase();
