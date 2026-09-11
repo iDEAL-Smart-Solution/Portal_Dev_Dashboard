@@ -53,11 +53,15 @@ body {
 
 img,
 video,
-svg,
 canvas {
 	max-width: 100%;
 	height: auto;
 	display: block;
+}
+
+svg {
+	max-width: 100%;
+	display: inline-block;
 }
 
 h1,

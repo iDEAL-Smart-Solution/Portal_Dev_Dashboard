@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSchoolStore } from '../../stores/schoolStore';
 import { useAuthStore } from '../../stores/authStore';
-import { Eye, Edit3, Power } from 'lucide-react';
+import { Eye, Edit3, Power, Trash2, AlertTriangle } from 'lucide-react';
 import { SchoolForm } from '../../components/schools/SchoolForm';
 import { SchoolFormData, GetSchoolResponse } from '../../types/school';
 import { resolveMediaUrl } from '../../config/media';
@@ -18,6 +18,7 @@ export const SchoolListPage: React.FC = () => {
     createSchool,
     updateSchool,
     updateSchoolSubscription,
+    deleteSchool,
     clearError
   } = useSchoolStore();
 
@@ -25,6 +26,9 @@ export const SchoolListPage: React.FC = () => {
   const [editingSchool, setEditingSchool] = useState<GetSchoolResponse | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [schoolToDelete, setSchoolToDelete] = useState<GetSchoolResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   useEffect(() => {
     fetchSchools();
@@ -88,6 +92,30 @@ export const SchoolListPage: React.FC = () => {
 
   const handleEdit = (school: GetSchoolResponse) => {
     setEditingSchool(school);
+  };
+
+  const handleDeleteClick = (school: GetSchoolResponse) => {
+    setDeleteConfirmText('');
+    setSchoolToDelete(school);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!schoolToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteSchool(schoolToDelete.id, deleteConfirmText);
+      setSchoolToDelete(null);
+      setDeleteConfirmText('');
+    } catch (error) {
+      console.error('Failed to delete school:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setSchoolToDelete(null);
+    setDeleteConfirmText('');
   };
 
   // Filter schools based on search term and status
@@ -323,34 +351,45 @@ export const SchoolListPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="inline-flex items-center gap-2">
+                        <div className="inline-flex items-center gap-1">
                           <button
                             onClick={() => handleViewProfile(school)}
-                            className="text-blue-600 hover:text-blue-700 p-1 transition-colors duration-200"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors duration-150"
                             title="View Profile"
                             aria-label="View Profile"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4 h-4" style={{ color: '#2563eb' }} />
                           </button>
                           <button
                             onClick={() => handleEdit(school)}
-                            className="text-gray-600 hover:text-gray-700 p-1 transition-colors duration-200"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-150"
                             title="Edit School"
                             aria-label="Edit School"
                           >
-                            <Edit3 className="w-4 h-4" />
+                            <Edit3 className="w-4 h-4" style={{ color: '#4b5563' }} />
                           </button>
                           <button
                             onClick={() => handleToggleSubscription(school)}
-                            className={`p-1 transition-colors duration-200 ${
+                            className={`inline-flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 ${
                               school.isSubscrptionActive
-                                ? 'text-red-600 hover:text-red-700'
-                                : 'text-green-600 hover:text-green-700'
+                                ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                                : 'bg-green-50 text-green-600 hover:bg-green-100'
                             }`}
                             title={school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
                             aria-label={school.isSubscrptionActive ? 'Deactivate Subscription' : 'Activate Subscription'}
                           >
-                            <Power className="w-4 h-4" />
+                            <Power
+                              className="w-4 h-4"
+                              style={{ color: school.isSubscrptionActive ? '#dc2626' : '#16a34a' }}
+                            />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(school)}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-150"
+                            title="Delete School"
+                            aria-label="Delete School"
+                          >
+                            <Trash2 className="w-4 h-4" style={{ color: '#dc2626' }} />
                           </button>
                         </div>
                       </td>
@@ -387,6 +426,103 @@ export const SchoolListPage: React.FC = () => {
                 onCancel={() => setEditingSchool(null)}
                 isLoading={isLoading}
               />
+            </div>
+          </div>
+        )}
+
+        {/* Delete School Confirmation Modal */}
+        {schoolToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+
+              {/* Header */}
+              <div className="flex items-center space-x-3 mb-5">
+                <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Delete School</h3>
+                  <p className="text-sm text-gray-500">This action is permanent and cannot be undone</p>
+                </div>
+              </div>
+
+              {/* School name display */}
+              <div className="bg-gray-50 border border-gray-200 rounded-md px-4 py-3 mb-4">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">School to be deleted</p>
+                <p className="text-base font-bold text-gray-900">{schoolToDelete.schoolName}</p>
+              </div>
+
+              {/* Warning list */}
+              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-5">
+                <p className="text-sm text-red-700 font-medium mb-2">
+                  This will permanently delete <strong>all associated data</strong> including:
+                </p>
+                <ul className="text-sm text-red-700 list-disc list-inside space-y-0.5">
+                  <li>All students, staff, parents and users</li>
+                  <li>All results, attendance and subject assignments</li>
+                  <li>All payments, subscriptions and payment types</li>
+                  <li>All classes, subjects, timetables and resources</li>
+                  <li>All events, announcements and academic sessions</li>
+                </ul>
+              </div>
+
+              {/* Confirmation input */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  To confirm, type{' '}
+                  <span className="font-mono font-bold text-red-700 bg-red-50 px-1 py-0.5 rounded">
+                    delete {schoolToDelete.schoolName}
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  onPaste={(e) => e.preventDefault()}
+                  placeholder={`delete ${schoolToDelete.schoolName}`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 font-mono"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                {deleteConfirmText.length > 0 &&
+                  deleteConfirmText.toLowerCase() !== `delete ${schoolToDelete.schoolName.toLowerCase()}` && (
+                    <p className="text-xs text-red-600 mt-1">
+                      Text doesn't match — type exactly: delete {schoolToDelete.schoolName}
+                    </p>
+                  )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={
+                    isDeleting ||
+                    deleteConfirmText.toLowerCase() !== `delete ${schoolToDelete.schoolName.toLowerCase()}`
+                  }
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete Permanently</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
             </div>
           </div>
         )}
