@@ -26,6 +26,16 @@ const isAuthLoginRequest = (config?: any) => {
   return requestUrl.includes('/auth/login');
 };
 
+const getToastSuppression = (config?: any) => {
+  const headers = config?.headers;
+  const skipGenericToast = headers?.['X-Skip-Generic-Toast'] === 'true';
+
+  return {
+    success: skipGenericToast || isAuthLoginRequest(config),
+    error: skipGenericToast || headers?.['X-Skip-Error-Toast'] === 'true',
+  };
+};
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('token');
@@ -72,7 +82,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     const method = response.config?.method?.toLowerCase();
-    const shouldShowSuccess = method ? SUCCESS_METHODS.has(method) && !isAuthLoginRequest(response.config) : false;
+    const shouldShowSuccess = method
+      ? SUCCESS_METHODS.has(method) && !getToastSuppression(response.config).success
+      : false;
 
     if (shouldShowSuccess) {
       const message = getResponseMessage(response.data) || 'Operation completed successfully';
@@ -82,7 +94,9 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    showError(getErrorMessage(error));
+    if (!getToastSuppression(error?.config).error) {
+      showError(getErrorMessage(error));
+    }
     return Promise.reject(error);
   }
 );
