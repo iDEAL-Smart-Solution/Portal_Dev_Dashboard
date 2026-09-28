@@ -5,6 +5,7 @@ import { SchoolProfilePage } from './pages/schools/SchoolProfilePage';
 import { AdminUserListPage } from './pages/adminUsers/AdminUserListPage';
 import { AdminUserProfilePage } from './pages/adminUsers/AdminUserProfilePage';
 import PaymentSettings from './pages/payment/PaymentSettings';
+import SystemSettingsPage from './pages/systemSettings/SystemSettingsPage';
 import LoginPage from './components/LoginPage';
 import { useAuthStore } from './stores/authStore';
 import Layout from './components/Layout';
@@ -55,6 +56,7 @@ function App() {
               <Route path="/admin-users" element={<AdminUserListPage />} />
               <Route path="/admin-users/:id" element={<AdminUserProfileWrapper />} />
               <Route path="/payment-settings" element={<PaymentSettings />} />
+              <Route path="/system-settings" element={<SystemSettingsPage />} />
               <Route path="/login" element={<Navigate to="/schools" replace />} />
             </Routes>
           </Layout>
