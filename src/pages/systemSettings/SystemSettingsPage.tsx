@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
+import { Download, ShieldAlert } from 'lucide-react';
 import { useSystemStore } from '../../stores/systemStore';
+import { useBackupStore } from '../../stores/backupStore';
+import { showError } from '../../lib/notifications';
 
 export default function SystemSettingsPage() {
   const { costConfig, isLoading, error, fetchStudentCostConfig, createStudentCostConfig, updateStudentCostConfig, clearError } =
     useSystemStore();
+
+  const downloadDatabaseBackup = useBackupStore((state) => state.downloadDatabaseBackup);
+  const backingUp = useBackupStore((state) => state.isLoading);
 
   const [inputPrice, setInputPrice] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -64,6 +70,33 @@ export default function SystemSettingsPage() {
     return isNaN(d.getTime())
       ? '—'
       : d.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+  };
+
+  const triggerBrowserDownload = (blob: Blob, filename: string) => {
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  };
+
+  const handleBackupDatabase = async () => {
+    if (backingUp) return;
+    try {
+      const { blob, filename } = await downloadDatabaseBackup();
+      triggerBrowserDownload(blob, filename);
+    } catch (err: any) {
+      const message =
+        err?.response?.status === 401
+          ? 'Your session expired. Please sign in again to download the backup.'
+          : err?.response?.data?.message || err?.message || 'Failed to create database backup';
+      showError(message);
+      console.error('Database backup download failed:', err);
+    }
   };
 
   return (
@@ -249,6 +282,37 @@ export default function SystemSettingsPage() {
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Database Backup card */}
+      <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100">
+              <ShieldAlert className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">Database Backup</h2>
+              <p className="text-xs text-gray-500">Download a full database backup from the portal API</p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleBackupDatabase}
+            disabled={backingUp}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+          >
+            <Download className="h-4 w-4" />
+            <span>{backingUp ? 'Downloading…' : 'Backup Database'}</span>
+          </button>
+        </div>
+
+        <div className="px-6 py-5">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Triggers a full export of the portal database. The file will download automatically in your browser.
+            Store it securely — it contains all school, student, and subscription data.
+          </p>
         </div>
       </section>
     </div>
